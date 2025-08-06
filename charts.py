@@ -167,16 +167,20 @@ def create_price_performance_chart(stock_data, spy_data=None):
         spy_returns = spy_hist['Close'].pct_change().fillna(0)
         spy_cumulative = (1 + spy_returns).cumprod() - 1
         
+        # Choose SPY color based on theme
+        spy_color = 'white'
+        
         fig.add_trace(
             go.Scatter(
                 x=spy_hist.index,
                 y=spy_cumulative * 100,
                 mode='lines',
                 name='SPY (Benchmark)',
-                line=dict(color='white', width=2, dash='dash')
+                line=dict(color=spy_color, width=2, dash='dash')
             )
         )
     
+    # Update layout with dark theme
     fig.update_layout(
         title='Portfolio Performance vs Benchmark',
         xaxis_title='Date',
@@ -276,17 +280,17 @@ def create_technical_indicators_chart(ticker, stock_data):
         row=2, col=1
     )
     
-    # Update layout with clean theme
+    # Update layout with dark theme
     fig.update_layout(
         title=f'{ticker} Technical Analysis',
         xaxis_rangeslider_visible=False,
         height=500,  # Reduced height
         showlegend=True,
-        template='plotly_white',
+        template='plotly_dark',
         margin=dict(l=50, r=50, t=50, b=50),  # Reduced margins
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        font=dict(color='#374151'),  # Clean dark gray text
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),  # White text for dark theme
         yaxis2=dict(
             title="RSI",
             overlaying="y",
@@ -346,6 +350,7 @@ def create_portfolio_summary_chart(analysis_results):
         row=2, col=2
     )
     
+    # Update layout with dark theme
     fig.update_layout(
         title='Portfolio Summary',
         height=600,
@@ -393,6 +398,7 @@ def create_sentiment_analysis_chart(analysis_results):
         )
     )
     
+    # Update layout with dark theme
     fig.update_layout(
         title='Sentiment Analysis by Stock',
         xaxis_title='Stock Ticker',
@@ -436,6 +442,7 @@ def create_recommendation_chart(analysis_results):
         )
     ])
     
+    # Update layout with dark theme
     fig.update_layout(
         title='Recommendation Distribution',
         template='plotly_dark',

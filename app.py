@@ -39,178 +39,175 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .positive { color: #28a745; }
-    .negative { color: #dc3545; }
-    .neutral { color: #6c757d; }
-    .chart-container {
-        background-color: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        border: 1px solid #e9ecef;
-    }
-    .stock-input-container {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 0.75rem;
-        border: 1px solid #dee2e6;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    /* Reduce spacing between sections */
-    .stExpander {
-        margin-bottom: 0.5rem !important;
-        border: 1px solid #e9ecef !important;
-        border-radius: 0.5rem !important;
-    }
-    .stExpander > div > div {
-        padding: 0.5rem !important;
-    }
-    /* Reduce spacing between chart and analysis */
-    .element-container {
-        margin-bottom: 0.5rem !important;
-    }
-    /* Compact layout for analysis summary */
-    .analysis-summary {
-        margin-top: 0.5rem !important;
-        margin-bottom: 0.5rem !important;
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border: 1px solid #e9ecef;
-    }
-    /* Clean sidebar styling */
-    .css-1d391kg {
-        background-color: #f8f9fa;
-    }
-    /* Better button styling */
-    .stButton > button {
-        border-radius: 0.5rem;
-        border: 1px solid #dee2e6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    /* Clean table styling */
-    .dataframe {
-        border-radius: 0.5rem;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    /* Remove footer */
-    .footer {
-        display: none;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Initialize session state for theme
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = True
+
+# Custom CSS for dark theme
+def get_theme_css():
+    return """
+    <style>
+        .main-header {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1f77b4;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background-color: #2d3748;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #1f77b4;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        .neutral { color: #9ca3af; }
+        .chart-container {
+            background-color: #1a202c;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 1px solid #2d3748;
+        }
+        .stock-input-container {
+            background-color: #2d3748;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #4a5568;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .stExpander {
+            margin-bottom: 0.5rem !important;
+            border: 1px solid #4a5568 !important;
+            border-radius: 0.5rem !important;
+            background-color: #2d3748 !important;
+        }
+        .stExpander > div > div {
+            padding: 0.5rem !important;
+            background-color: #2d3748 !important;
+        }
+        .element-container {
+            margin-bottom: 0.5rem !important;
+        }
+        .analysis-summary {
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+            background-color: #2d3748;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #4a5568;
+            color: white;
+        }
+        .css-1d391kg {
+            background-color: #1a202c;
+        }
+        .stButton > button {
+            border-radius: 0.5rem;
+            border: 1px solid #4a5568;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            background-color: #2d3748;
+            color: white;
+        }
+        .dataframe {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            background-color: #2d3748;
+            color: white;
+        }
+        .footer {
+            display: none;
+        }
+    </style>
+    """
 
 def main():
+    # Initialize session state
+    if 'stocks' not in st.session_state:
+        st.session_state.stocks = []
+    if 'analyze_clicked' not in st.session_state:
+        st.session_state.analyze_clicked = False
+    
+    # Apply theme CSS
+    st.markdown(get_theme_css(), unsafe_allow_html=True)
+
     # Header
     st.markdown('<h1 class="main-header">📈 Advanced Stock Portfolio Manager</h1>', unsafe_allow_html=True)
     st.markdown("### Comprehensive Investment Analysis & Interactive Charts")
     
-    # Sidebar for input
+    # Sidebar
     with st.sidebar:
-        st.header("Portfolio Input")
-        
-        # Initialize session state for stocks if not exists
-        if 'stocks' not in st.session_state:
-            st.session_state.stocks = []
+        st.title("🎯 Portfolio Manager")
         
         # Stock input section
-        st.markdown('<div class="stock-input-container">', unsafe_allow_html=True)
-        st.subheader("Add Stocks")
+        st.subheader("📊 Add Stocks")
         
-        # Popular stocks suggestions
-        popular_stocks = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "NFLX", "JPM", "JNJ"]
-        
-        # Show popular stocks as quick add buttons
-        st.write("**Quick Add Popular Stocks:**")
-        popular_cols = st.columns(5)
-        for i, stock in enumerate(popular_stocks):
-            with popular_cols[i % 5]:
-                if st.button(stock, key=f"quick_{stock}", use_container_width=True):
-                    if stock not in st.session_state.stocks:
-                        st.session_state.stocks.append(stock)
-                        st.success(f"✅ Added {stock}")
-                        st.rerun()
-                    else:
-                        st.error(f"❌ {stock} is already in your portfolio")
-        
-        st.markdown("---")
-        
-        # Text input for new stock
-        new_stock = st.text_input(
-            "Enter Stock Ticker",
-            placeholder="e.g., AAPL",
-            help="Enter a stock ticker symbol and click 'Add Stock'"
-        ).strip().upper()
+        # Text input for adding stocks
+        new_stock = st.text_input("Enter stock ticker:", key="new_stock_input", placeholder="e.g., AAPL")
         
         # Add stock button
         col1, col2 = st.columns([1, 1])
         with col1:
-            if st.button("➕ Add Stock", type="primary", use_container_width=True):
-                if new_stock:
-                    if new_stock not in st.session_state.stocks:
-                        # Basic validation - check if it's a valid ticker format
-                        if len(new_stock) <= 5 and new_stock.isalpha():
-                            st.session_state.stocks.append(new_stock)
-                            st.success(f"✅ Added {new_stock}")
+            if st.button("➕ Add Stock", use_container_width=True):
+                if new_stock and new_stock.strip():
+                    ticker = new_stock.strip().upper()
+                    if len(ticker) <= 5 and ticker.isalpha():
+                        if ticker not in st.session_state.stocks:
+                            st.session_state.stocks.append(ticker)
+                            st.success(f"✅ Added {ticker}")
                             st.rerun()
                         else:
-                            st.error("❌ Please enter a valid stock ticker (1-5 letters)")
+                            st.error(f"❌ {ticker} is already in your portfolio")
                     else:
-                        st.error(f"❌ {new_stock} is already in your portfolio")
-                else:
-                    st.error("❌ Please enter a stock ticker")
+                        st.error("❌ Please enter a valid ticker (1-5 letters)")
         
         with col2:
             if st.button("🗑️ Clear All", use_container_width=True):
                 st.session_state.stocks = []
-                st.success("✅ Portfolio cleared")
                 st.rerun()
         
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Quick add popular stocks
+        st.subheader("🚀 Quick Add")
+        popular_stocks = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "NFLX", "JPM", "JNJ"]
+        
+        cols = st.columns(2)
+        for i, stock in enumerate(popular_stocks):
+            col_idx = i % 2
+            if cols[col_idx].button(stock, key=f"quick_{stock}", use_container_width=True):
+                if stock not in st.session_state.stocks:
+                    st.session_state.stocks.append(stock)
+                    st.success(f"✅ Added {stock}")
+                    st.rerun()
+                else:
+                    st.error(f"❌ {stock} is already in your portfolio")
         
         # Display current stocks
         if st.session_state.stocks:
-            st.subheader("Current Portfolio")
+            st.subheader("📈 Current Portfolio")
             for i, stock in enumerate(st.session_state.stocks):
                 col1, col2 = st.columns([3, 1])
                 with col1:
                     st.write(f"• {stock}")
                 with col2:
-                    if st.button(f"❌", key=f"remove_{i}"):
-                        st.session_state.stocks.pop(i)
-                        st.success(f"✅ Removed {stock}")
+                    if st.button("❌", key=f"remove_{stock}", help=f"Remove {stock}"):
+                        st.session_state.stocks.remove(stock)
                         st.rerun()
-        else:
-            st.info("👈 Add stocks to your portfolio to get started")
         
-        # Analysis button
+        # Analyze button
+        st.markdown("---")
         if st.session_state.stocks:
-            st.markdown("---")
-            analyze_button = st.button("🚀 Analyze Portfolio", type="primary", use_container_width=True)
+            if st.button("🔍 Analyze Portfolio", use_container_width=True, type="primary"):
+                st.session_state.analyze_clicked = True
         else:
-            analyze_button = False
+            st.info("👈 Add stocks to analyze your portfolio")
     
     # Main content area
-    if analyze_button and st.session_state.stocks:
+    if st.session_state.analyze_clicked and st.session_state.stocks:
         with st.spinner("Fetching market data and analyzing portfolio..."):
             # Progress bar
             progress_bar = st.progress(0)
@@ -301,24 +298,24 @@ def display_enhanced_results(analysis_results, portfolio_metrics, performance_da
         )
     
     # Portfolio Performance Chart
-    st.subheader("📈 Portfolio Performance vs Benchmark")
+    st.subheader("📊 Portfolio Performance")
     performance_chart = create_price_performance_chart(stock_data, spy_data)
     if performance_chart:
         st.plotly_chart(performance_chart, use_container_width=True)
     
     # Portfolio Summary Charts
-    st.subheader("📊 Portfolio Summary")
+    st.subheader("📈 Portfolio Summary")
     summary_chart = create_portfolio_summary_chart(analysis_results)
     if summary_chart:
         st.plotly_chart(summary_chart, use_container_width=True)
     
     # Sentiment Analysis Chart
-    st.subheader("🧠 Sentiment Analysis")
+    st.subheader("😊 Sentiment Analysis")
     sentiment_chart = create_sentiment_analysis_chart(analysis_results)
     if sentiment_chart:
         st.plotly_chart(sentiment_chart, use_container_width=True)
     
-    # Recommendation Distribution
+    # Recommendation Distribution Chart
     st.subheader("🎯 Recommendation Distribution")
     recommendation_chart = create_recommendation_chart(analysis_results)
     if recommendation_chart:
