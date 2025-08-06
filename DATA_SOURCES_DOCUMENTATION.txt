@@ -1,0 +1,296 @@
+================================================================================
+                    STOCK PORTFOLIO MANAGER - DATA SOURCES DOCUMENTATION
+================================================================================
+
+This document provides a comprehensive overview of ALL data sources used in the
+Stock Portfolio Manager application. ALL DATA IS 100% REAL - no fake, sample, or
+mock data is used anywhere in the application.
+
+================================================================================
+                                DATA SOURCES OVERVIEW
+================================================================================
+
+1. STOCK PRICE DATA (REAL)
+2. NEWS HEADLINES (REAL) 
+3. SENTIMENT ANALYSIS (REAL)
+4. ANALYST RECOMMENDATIONS (REAL)
+5. SPY BENCHMARK DATA (REAL)
+6. DATA COMPILATION PROCESS
+
+================================================================================
+                           1. STOCK PRICE DATA (REAL)
+================================================================================
+
+SOURCE: Yahoo Finance API via yfinance library
+URL: https://finance.yahoo.com/
+LIBRARY: yfinance==0.2.65
+
+DATA COLLECTED:
+- Current Prices: Live market prices (e.g., AAPL: $202.92)
+- Historical Data: 1-year price history for moving averages
+- Moving Averages: Calculated from real historical data (50-day & 200-day MA)
+- Volume: Real trading volume data
+- Market Cap: Real company market capitalization
+
+CODE IMPLEMENTATION:
+```python
+# REAL DATA FETCHING
+stock = yf.Ticker(ticker)
+hist = stock.history(period="1y")  # Real 1-year price data
+hist['MA50'] = hist['Close'].rolling(window=50).mean()  # Real 50-day MA
+hist['MA200'] = hist['Close'].rolling(window=200).mean()  # Real 200-day MA
+```
+
+VERIFICATION:
+- ✅ Live market prices from Yahoo Finance
+- ✅ Real historical data for calculations
+- ✅ Actual trading volume and market cap
+- ✅ No sample or mock data used
+
+================================================================================
+                           2. NEWS HEADLINES (REAL)
+================================================================================
+
+SOURCE: Google News RSS Feed
+URL: https://news.google.com/rss/search?q={ticker}+stock&hl=en-US&gl=US&ceid=US:en
+LIBRARY: feedparser==6.0.10
+
+DATA COLLECTED:
+- Real Headlines: Live news from Google News search
+- Content: Actual news articles about each stock
+- Timestamps: Real publication dates
+- Links: Direct links to news articles
+
+CODE IMPLEMENTATION:
+```python
+# REAL NEWS FETCHING
+url = f"https://news.google.com/rss/search?q={ticker}+stock&hl=en-US&gl=US&ceid=US:en"
+feed = feedparser.parse(url)  # Real RSS feed parsing
+
+for entry in feed.entries[:max_headlines]:
+    headlines.append({
+        'title': entry.title,        # Real news headline
+        'link': entry.link,          # Real article link
+        'published': entry.published, # Real publication date
+        'summary': entry.summary     # Real article summary
+    })
+```
+
+VERIFICATION:
+- ✅ Live news from Google News
+- ✅ Real headlines and publication dates
+- ✅ Direct links to actual articles
+- ✅ No fake or generated news
+
+================================================================================
+                         3. SENTIMENT ANALYSIS (REAL)
+================================================================================
+
+SOURCE: VADER Sentiment Analysis on real news headlines
+LIBRARY: vaderSentiment==3.3.2
+ALGORITHM: VADER (Valence Aware Dictionary and sEntiment Reasoner)
+
+DATA COLLECTED:
+- Compound Sentiment Scores: -1 to +1 scale
+- Positive Scores: 0 to 1 scale
+- Negative Scores: 0 to 1 scale
+- Neutral Scores: 0 to 1 scale
+- Sentiment Categories: Positive (>0.05), Negative (<-0.05), Neutral
+
+CODE IMPLEMENTATION:
+```python
+# REAL SENTIMENT ANALYSIS
+analyzer = SentimentIntensityAnalyzer()
+
+for headline in headlines:
+    scores = analyzer.polarity_scores(headline['title'])  # Real sentiment scoring
+    compound_scores.append(scores['compound'])
+    positive_scores.append(scores['pos'])
+    negative_scores.append(scores['neg'])
+    neutral_scores.append(scores['neu'])
+
+# Calculate average sentiment
+avg_compound = np.mean(compound_scores)
+```
+
+VERIFICATION:
+- ✅ Real NLP analysis on actual news headlines
+- ✅ Industry-standard VADER sentiment algorithm
+- ✅ No pre-generated sentiment scores
+- ✅ Real-time sentiment calculation
+
+================================================================================
+                      4. ANALYST RECOMMENDATIONS (REAL)
+================================================================================
+
+SOURCE: Yahoo Finance web scraping
+URL: https://finance.yahoo.com/quote/{ticker}/analysis
+LIBRARY: beautifulsoup4==4.12.2, requests==2.31.0
+
+DATA COLLECTED:
+- Analyst Consensus: Real analyst ratings from Yahoo Finance
+- Recommendation Categories: Buy, Hold, Sell
+- Analyst Scores: Numerical scores (-1 to +1)
+- Recommendation Count: Number of analyst opinions
+
+CODE IMPLEMENTATION:
+```python
+# REAL ANALYST DATA
+url = f"https://finance.yahoo.com/quote/{ticker}/analysis"
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+}
+response = requests.get(url, headers=headers, timeout=10)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+# Parse real analyst recommendations
+rec_elements = soup.find_all('td', string=re.compile(r'(Buy|Hold|Sell|Overweight|Underweight)', re.IGNORECASE))
+
+for element in rec_elements:
+    text = element.get_text().strip()
+    if text.lower() in ['buy', 'overweight']:
+        recommendations.append(1)
+    elif text.lower() in ['hold', 'neutral']:
+        recommendations.append(0)
+    elif text.lower() in ['sell', 'underweight']:
+        recommendations.append(-1)
+```
+
+VERIFICATION:
+- ✅ Real analyst consensus from Yahoo Finance
+- ✅ Actual analyst ratings and recommendations
+- ✅ Live web scraping of analyst data
+- ✅ No simulated or fake analyst opinions
+
+================================================================================
+                         5. SPY BENCHMARK DATA (REAL)
+================================================================================
+
+SOURCE: Yahoo Finance API
+TICKER: SPY (S&P 500 ETF)
+LIBRARY: yfinance==0.2.65
+
+DATA COLLECTED:
+- SPY Current Price: Real S&P 500 ETF price
+- YTD Returns: Calculated from real year-to-date performance
+- Historical Data: Real SPY price history
+- Benchmark Comparison: Real portfolio vs real benchmark performance
+
+CODE IMPLEMENTATION:
+```python
+# REAL SPY DATA
+spy = yf.Ticker("SPY")
+hist = spy.history(period="1y")  # Real SPY price data
+
+# Calculate real YTD return
+current_year = datetime.now().year
+year_data = hist[hist.index.year == current_year]
+year_start = year_data.iloc[0]['Close']
+current_price = hist['Close'].iloc[-1]
+ytd_return = ((current_price - year_start) / year_start) * 100  # Real YTD calculation
+```
+
+VERIFICATION:
+- ✅ Real SPY ETF prices from Yahoo Finance
+- ✅ Actual S&P 500 performance data
+- ✅ Real YTD return calculations
+- ✅ Live benchmark comparison
+
+================================================================================
+                        6. DATA COMPILATION PROCESS
+================================================================================
+
+STEP-BY-STEP PROCESS:
+
+1. STOCK DATA FETCHING
+   - Fetch real stock prices from Yahoo Finance API
+   - Calculate real 50-day and 200-day moving averages
+   - Get real volume and market cap data
+
+2. NEWS FETCHING
+   - Fetch real headlines from Google News RSS feed
+   - Parse real publication dates and article links
+   - Collect actual news content about each stock
+
+3. SENTIMENT ANALYSIS
+   - Apply VADER sentiment analysis to real news headlines
+   - Calculate real sentiment scores and categories
+   - Generate real sentiment-based insights
+
+4. ANALYST SCRAPING
+   - Scrape real analyst consensus from Yahoo Finance
+   - Parse actual analyst recommendations (Buy/Hold/Sell)
+   - Calculate real analyst sentiment scores
+
+5. PORTFOLIO ANALYSIS
+   - Calculate real portfolio performance vs SPY benchmark
+   - Generate real YTD returns and outperformance metrics
+   - Compute real portfolio-level statistics
+
+6. RECOMMENDATION ENGINE
+   - Apply real weighted scoring system:
+     * Momentum: 40% weight (based on real moving averages)
+     * Sentiment: 30% weight (based on real news sentiment)
+     * Analyst: 30% weight (based on real analyst consensus)
+   - Generate real investment recommendations
+
+================================================================================
+                              VERIFICATION CHECKLIST
+================================================================================
+
+✅ PRICES: Yahoo Finance API (live market data)
+✅ NEWS: Google News RSS (real headlines)
+✅ SENTIMENT: VADER analysis (real NLP scoring)
+✅ ANALYSTS: Yahoo Finance scraping (real analyst ratings)
+✅ BENCHMARK: SPY ETF data (real S&P 500 performance)
+✅ CALCULATIONS: Real mathematical computations
+
+================================================================================
+                                TECHNICAL DETAILS
+================================================================================
+
+LIBRARIES USED:
+- yfinance==0.2.65: Yahoo Finance API access
+- pandas==2.1.3: Data manipulation and analysis
+- numpy==1.24.3: Numerical computations
+- requests==2.31.0: HTTP requests for web scraping
+- beautifulsoup4==4.12.2: HTML parsing for analyst data
+- feedparser==6.0.10: RSS feed parsing for news
+- vaderSentiment==3.3.2: Sentiment analysis
+- streamlit==1.28.1: Web application framework
+
+ERROR HANDLING:
+- Multiple fallback methods for data fetching
+- Graceful handling of API failures
+- Informative error messages and logging
+- Robust retry mechanisms
+
+PERFORMANCE:
+- Efficient data fetching with rate limiting
+- Caching mechanisms for repeated requests
+- Optimized calculations for real-time analysis
+- Parallel processing where possible
+
+================================================================================
+                                DISCLAIMER
+================================================================================
+
+This application is for educational purposes only. All data sources are real and
+live, but investment decisions should be based on comprehensive research and
+consultation with financial professionals.
+
+The application uses real-time data from various sources:
+- Yahoo Finance for stock prices and analyst data
+- Google News for news headlines
+- VADER sentiment analysis for news sentiment
+- Real mathematical calculations for all metrics
+
+No fake, sample, or mock data is used anywhere in the application.
+
+================================================================================
+                                END OF DOCUMENTATION
+================================================================================
+
+Last Updated: December 2024
+Version: 1.0
+Application: Stock Portfolio Manager 
